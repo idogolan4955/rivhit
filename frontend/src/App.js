@@ -2,10 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, Typography, TextField, Button, Stack } from '@mui/material';
 
+const agentNames = {
+  "259": "יוגב - חנות",
+  "258": "יוגב - חנות",
+  "257": "גל",
+  "718": "נדב",
+  "294": "יוגב - חנות",
+  "697": "עידו",
+  "87": "יוגב - חנות",
+  "555": "נדב"
+};
+
 const columns = [
   { field: 'id', headerName: 'מזהה', flex: 1, filterable: true },
   { field: 'Name', headerName: 'שם לקוח', flex: 2, filterable: true },
-  { field: 'agent_name', headerName: 'שם סוכן', flex: 2, filterable: true },
+  { field: 'agent_name', headerName: 'שם סוכן', flex: 2, filterable: true,
+    valueGetter: (params) => agentNames[params.value] || params.value },
   { field: 'balance', headerName: 'יתרה (₪)', flex: 1, filterable: true, type: 'number',
     valueFormatter: (params) => params.value !== null && params.value !== undefined ? params.value.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' }) : '' },
   // Add more fields as needed
@@ -62,7 +74,7 @@ function App() {
             <tr>
               <td>${row.id}</td>
               <td>${row.Name}</td>
-              <td>${row.agent_name}</td>
+              <td>${agentNames[row.agent_name] || row.agent_name}</td>
               <td>${row.balance?.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' }) || ''}</td>
             </tr>
           `).join('')}
