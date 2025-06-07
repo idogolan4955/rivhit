@@ -16,8 +16,7 @@ const agentNames = {
 const columns = [
   { field: 'id', headerName: 'מזהה', flex: 1, filterable: true },
   { field: 'Name', headerName: 'שם לקוח', flex: 2, filterable: true },
-  { field: 'agent_name', headerName: 'שם סוכן', flex: 2, filterable: true,
-    valueGetter: (params) => agentNames[params.value] || params.value },
+  { field: 'agent_display', headerName: 'שם סוכן', flex: 2, filterable: true },
   { field: 'balance', headerName: 'יתרה (₪)', flex: 1, filterable: true, type: 'number',
     valueFormatter: (params) => params.value !== null && params.value !== undefined ? params.value.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' }) : '' },
   // Add more fields as needed
@@ -38,7 +37,8 @@ function App() {
           .filter(row => row.id !== undefined && row.id !== null)
           .map(row => ({
             ...row,
-            id: String(row.id)
+            id: String(row.id),
+            agent_display: agentNames[row.agent_name] || row.agent_name
           }));
         setRows(rowsWithStringId);
         setSelectionModel([]);
@@ -48,7 +48,7 @@ function App() {
   // סינון נתונים
   const filteredRows = rows.filter(row => {
     const nameMatch = row.Name?.includes(filterName);
-    const agentMatch = row.agent_name?.includes(filterAgent);
+    const agentMatch = row.agent_display?.includes(filterAgent);
     const balanceMatch = filterBalance === '' || (row.balance !== undefined && row.balance !== null && row.balance.toString().includes(filterBalance));
     return nameMatch && agentMatch && balanceMatch;
   });
@@ -74,7 +74,7 @@ function App() {
             <tr>
               <td>${row.id}</td>
               <td>${row.Name}</td>
-              <td>${agentNames[row.agent_name] || row.agent_name}</td>
+              <td>${row.agent_display}</td>
               <td>${row.balance?.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' }) || ''}</td>
             </tr>
           `).join('')}
