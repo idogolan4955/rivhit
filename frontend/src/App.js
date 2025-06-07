@@ -103,26 +103,29 @@ function App() {
       <Typography variant="h4" gutterBottom align="right">דוח יתרות לקוחות</Typography>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <TextField label="חפש לפי שם לקוח" value={filterName} onChange={e => setFilterName(e.target.value)} size="small" />
-        <FormGroup>
-          {Object.values(agentNames).map((agentName) => (
-            <FormControlLabel
-              key={agentName}
-              control={
-                <Checkbox
-                  checked={selectedAgents.includes(agentName)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedAgents([...selectedAgents, agentName]);
-                    } else {
-                      setSelectedAgents(selectedAgents.filter(name => name !== agentName));
-                    }
-                  }}
-                />
-              }
-              label={agentName}
-            />
-          ))}
-        </FormGroup>
+        <Box sx={{ maxWidth: 600, overflowX: 'auto', whiteSpace: 'nowrap', p: 1, bgcolor: '#fafafa', borderRadius: 2, border: '1px solid #eee', minHeight: 56 }}>
+          <Stack direction="row" spacing={1}>
+            {Object.values(agentNames).map((agentName) => (
+              <FormControlLabel
+                key={agentName}
+                control={
+                  <Checkbox
+                    checked={selectedAgents.includes(agentName)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedAgents([...selectedAgents, agentName]);
+                      } else {
+                        setSelectedAgents(selectedAgents.filter(name => name !== agentName));
+                      }
+                    }}
+                  />
+                }
+                label={agentName}
+                sx={{ mr: 1, whiteSpace: 'nowrap' }}
+              />
+            ))}
+          </Stack>
+        </Box>
         <TextField label="חפש לפי יתרה" value={filterBalance} onChange={e => setFilterBalance(e.target.value)} size="small" />
         <Button variant="contained" color="primary" onClick={handlePrint} disabled={selectedRows.length === 0}>הדפס נבחרים</Button>
         <Typography variant="subtitle1" sx={{ ml: 2, alignSelf: 'center' }}>
