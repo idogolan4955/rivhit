@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Typography, TextField, Button, Stack } from '@mui/material';
+import { Box, Typography, TextField, Button, Stack, FormGroup, FormControlLabel, Checkbox } from '@mui/material';
 
 const agentNames = {
   "259": "יוגב - חנות",
@@ -25,7 +25,7 @@ const columns = [
 function App() {
   const [rows, setRows] = useState([]);
   const [filterName, setFilterName] = useState('');
-  const [filterAgent, setFilterAgent] = useState('');
+  const [selectedAgents, setSelectedAgents] = useState([]);
   const [filterBalance, setFilterBalance] = useState('');
   const [selectionModel, setSelectionModel] = useState([]);
 
@@ -48,7 +48,7 @@ function App() {
   // סינון נתונים
   const filteredRows = rows.filter(row => {
     const nameMatch = row.Name?.includes(filterName);
-    const agentMatch = row.agent_display?.includes(filterAgent);
+    const agentMatch = selectedAgents.length === 0 || selectedAgents.includes(row.agent_display);
     const balanceMatch = filterBalance === '' || (row.balance !== undefined && row.balance !== null && row.balance.toString().includes(filterBalance));
     return nameMatch && agentMatch && balanceMatch;
   });
@@ -103,7 +103,26 @@ function App() {
       <Typography variant="h4" gutterBottom align="right">דוח יתרות לקוחות</Typography>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <TextField label="חפש לפי שם לקוח" value={filterName} onChange={e => setFilterName(e.target.value)} size="small" />
-        <TextField label="חפש לפי שם סוכן" value={filterAgent} onChange={e => setFilterAgent(e.target.value)} size="small" />
+        <FormGroup>
+          {Object.values(agentNames).map((agentName) => (
+            <FormControlLabel
+              key={agentName}
+              control={
+                <Checkbox
+                  checked={selectedAgents.includes(agentName)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedAgents([...selectedAgents, agentName]);
+                    } else {
+                      setSelectedAgents(selectedAgents.filter(name => name !== agentName));
+                    }
+                  }}
+                />
+              }
+              label={agentName}
+            />
+          ))}
+        </FormGroup>
         <TextField label="חפש לפי יתרה" value={filterBalance} onChange={e => setFilterBalance(e.target.value)} size="small" />
         <Button variant="contained" color="primary" onClick={handlePrint} disabled={selectedRows.length === 0}>הדפס נבחרים</Button>
         <Typography variant="subtitle1" sx={{ ml: 2, alignSelf: 'center' }}>
