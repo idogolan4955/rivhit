@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Typography, TextField, Button, Stack, FormGroup, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, Typography, TextField, Button, Stack, FormGroup, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import './App.css';
 
 const agentNames = {
@@ -29,6 +29,7 @@ function App() {
   const [selectedAgents, setSelectedAgents] = useState([]);
   const [filterBalance, setFilterBalance] = useState('');
   const [selectionModel, setSelectionModel] = useState([]);
+  const [printDialogOpen, setPrintDialogOpen] = useState(false);
 
   useEffect(() => {
     fetch('https://rivhit.onrender.com/api/clients')
@@ -58,39 +59,11 @@ function App() {
   const selectedRows = rows.filter(row => selectionModel.includes(row.id));
   const totalBalance = selectedRows.reduce((sum, row) => sum + (row.balance || 0), 0);
 
-  // הדפסה של הנבחרים בלבד
-  const handlePrint = () => {
-    const tableHtml = `
-      <table border="1" dir="rtl" style="width:100%; border-collapse:collapse; font-family:inherit;">
-        <thead>
-          <tr>
-            <th>מזהה</th>
-            <th>שם לקוח</th>
-            <th>שם סוכן</th>
-            <th>יתרה (₪)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${selectedRows.map(row => `
-            <tr>
-              <td>${row.id}</td>
-              <td>${row.Name}</td>
-              <td>${row.agent_display}</td>
-              <td>${row.balance?.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' }) || ''}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-    const printFrame = document.createElement('iframe');
-    printFrame.style.display = 'none';
-    document.body.appendChild(printFrame);
-    printFrame.contentDocument.write('<html><head><title>הדפסת לקוחות</title></head><body>' + tableHtml + '</body></html>');
-    printFrame.contentDocument.close();
-    printFrame.contentWindow.print();
-    setTimeout(() => {
-      document.body.removeChild(printFrame);
-    }, 1000);
+  // הדפסה של הנבחרים בלבד (דרך מודאל)
+  const handleOpenPrintDialog = () => setPrintDialogOpen(true);
+  const handleClosePrintDialog = () => setPrintDialogOpen(false);
+  const handlePrintInDialog = () => {
+    window.print();
   };
 
   // Add debug logs
@@ -128,7 +101,7 @@ function App() {
           </Stack>
         </Box>
         <TextField label="חפש לפי יתרה" value={filterBalance} onChange={e => setFilterBalance(e.target.value)} size="small" />
-        <Button variant="contained" color="primary" onClick={handlePrint} disabled={selectedRows.length === 0}>הדפס נבחרים</Button>
+        <Button variant="contained" color="primary" onClick={handleOpenPrintDialog} disabled={selectedRows.length === 0}>הדפס נבחרים</Button>
         <Typography variant="subtitle1" sx={{ ml: 2, alignSelf: 'center' }}>
           יתרה כוללת לנבחרים: {totalBalance.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' })}
         </Typography>
@@ -146,6 +119,36 @@ function App() {
           selectionModel={selectionModel}
         />
       </div>
+      {/* Print Dialog */}
+      <Dialog open={printDialogOpen} onClose={handleClosePrintDialog} maxWidth="md" fullWidth>
+        <DialogTitle>הדפסת לקוחות נבחרים</DialogTitle>
+        <DialogContent>
+          <table border="1" dir="rtl" style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'inherit' }}>
+            <thead>
+              <tr>
+                <th>מזהה</th>
+                <th>שם לקוח</th>
+                <th>שם סוכן</th>
+                <th>יתרה (₪)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedRows.map(row => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.Name}</td>
+                  <td>{row.agent_display}</td>
+                  <td>{row.balance?.toLocaleString('he-IL', { style: 'currency', currency: 'ILS' }) || ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handlePrintInDialog} variant="contained" color="primary">הדפס</Button>
+          <Button onClick={handleClosePrintDialog} variant="outlined">סגור</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
